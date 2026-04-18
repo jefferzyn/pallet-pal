@@ -1,0 +1,2 @@
+[functions.count-pallet]
+verify_jwt = true
