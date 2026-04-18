@@ -14,16 +14,271 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      pallet_count_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_count: number
+          pallet_id: string
+          previous_count: number | null
+          reason: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_count: number
+          pallet_id: string
+          previous_count?: number | null
+          reason?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_count?: number
+          pallet_id?: string
+          previous_count?: number | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pallet_count_history_pallet_id_fkey"
+            columns: ["pallet_id"]
+            isOneToOne: false
+            referencedRelation: "pallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pallets: {
+        Row: {
+          ai_confidence: number | null
+          ai_count: number | null
+          ai_reasoning: string | null
+          captured_at: string
+          captured_by: string | null
+          final_count: number | null
+          id: string
+          notes: string | null
+          product_id: string | null
+          status: Database["public"]["Enums"]["pallet_status"]
+          upc: string | null
+          updated_at: string
+          video_path: string | null
+          warehouse_id: string
+        }
+        Insert: {
+          ai_confidence?: number | null
+          ai_count?: number | null
+          ai_reasoning?: string | null
+          captured_at?: string
+          captured_by?: string | null
+          final_count?: number | null
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          status?: Database["public"]["Enums"]["pallet_status"]
+          upc?: string | null
+          updated_at?: string
+          video_path?: string | null
+          warehouse_id: string
+        }
+        Update: {
+          ai_confidence?: number | null
+          ai_count?: number | null
+          ai_reasoning?: string | null
+          captured_at?: string
+          captured_by?: string | null
+          final_count?: number | null
+          id?: string
+          notes?: string | null
+          product_id?: string | null
+          status?: Database["public"]["Enums"]["pallet_status"]
+          upc?: string | null
+          updated_at?: string
+          video_path?: string | null
+          warehouse_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pallets_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pallets_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          brand: string | null
+          created_at: string
+          created_by: string | null
+          default_units_per_box: number | null
+          id: string
+          image_url: string | null
+          name: string
+          upc: string
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_units_per_box?: number | null
+          id?: string
+          image_url?: string | null
+          name: string
+          upc: string
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          created_by?: string | null
+          default_units_per_box?: number | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          upc?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_warehouses: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+          warehouse_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+          warehouse_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+          warehouse_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_warehouses_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      warehouses: {
+        Row: {
+          address: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_access_warehouse: {
+        Args: { _user_id: string; _warehouse_id: string }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin_or_manager: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "manager" | "worker"
+      pallet_status: "draft" | "counted" | "confirmed" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +405,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "manager", "worker"],
+      pallet_status: ["draft", "counted", "confirmed", "archived"],
+    },
   },
 } as const
