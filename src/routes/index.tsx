@@ -59,7 +59,7 @@ function Dashboard() {
     setStats({
       warehouses: whRes.count ?? 0,
       pallets: pallets.length,
-      totalBoxes: pallets.reduce((s, p) => s + (p.final_count ?? p as { ai_count?: number }["ai_count"] as number ?? 0), 0),
+      totalBoxes: pallets.reduce((s, p) => s + (p.final_count ?? 0), 0),
       lowConfidence: pallets.filter((p) => (p.ai_confidence ?? 1) < 0.6).length,
     });
     setRecent((recentRes.data as unknown as RecentPallet[]) ?? []);
