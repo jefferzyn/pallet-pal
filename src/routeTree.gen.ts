@@ -16,6 +16,8 @@ import { Route as InventoryRouteImport } from './routes/inventory'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WarehousesIdRouteImport } from './routes/warehouses.$id'
+import { Route as PalletsNewRouteImport } from './routes/pallets.new'
+import { Route as PalletsIdRouteImport } from './routes/pallets.$id'
 
 const WarehousesRoute = WarehousesRouteImport.update({
   id: '/warehouses',
@@ -52,6 +54,16 @@ const WarehousesIdRoute = WarehousesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => WarehousesRoute,
 } as any)
+const PalletsNewRoute = PalletsNewRouteImport.update({
+  id: '/pallets/new',
+  path: '/pallets/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PalletsIdRoute = PalletsIdRouteImport.update({
+  id: '/pallets/$id',
+  path: '/pallets/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -60,6 +72,8 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/warehouses': typeof WarehousesRouteWithChildren
+  '/pallets/$id': typeof PalletsIdRoute
+  '/pallets/new': typeof PalletsNewRoute
   '/warehouses/$id': typeof WarehousesIdRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +83,8 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/warehouses': typeof WarehousesRouteWithChildren
+  '/pallets/$id': typeof PalletsIdRoute
+  '/pallets/new': typeof PalletsNewRoute
   '/warehouses/$id': typeof WarehousesIdRoute
 }
 export interface FileRoutesById {
@@ -79,6 +95,8 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/warehouses': typeof WarehousesRouteWithChildren
+  '/pallets/$id': typeof PalletsIdRoute
+  '/pallets/new': typeof PalletsNewRoute
   '/warehouses/$id': typeof WarehousesIdRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +108,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/warehouses'
+    | '/pallets/$id'
+    | '/pallets/new'
     | '/warehouses/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +119,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/warehouses'
+    | '/pallets/$id'
+    | '/pallets/new'
     | '/warehouses/$id'
   id:
     | '__root__'
@@ -108,6 +130,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/warehouses'
+    | '/pallets/$id'
+    | '/pallets/new'
     | '/warehouses/$id'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +142,8 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   WarehousesRoute: typeof WarehousesRouteWithChildren
+  PalletsIdRoute: typeof PalletsIdRoute
+  PalletsNewRoute: typeof PalletsNewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -171,6 +197,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WarehousesIdRouteImport
       parentRoute: typeof WarehousesRoute
     }
+    '/pallets/new': {
+      id: '/pallets/new'
+      path: '/pallets/new'
+      fullPath: '/pallets/new'
+      preLoaderRoute: typeof PalletsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pallets/$id': {
+      id: '/pallets/$id'
+      path: '/pallets/$id'
+      fullPath: '/pallets/$id'
+      preLoaderRoute: typeof PalletsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -193,7 +233,18 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   WarehousesRoute: WarehousesRouteWithChildren,
+  PalletsIdRoute: PalletsIdRoute,
+  PalletsNewRoute: PalletsNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
