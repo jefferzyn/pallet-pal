@@ -13,6 +13,7 @@ import { Route as WarehousesRouteImport } from './routes/warehouses'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InventoryRouteImport } from './routes/inventory'
+import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WarehousesIdRouteImport } from './routes/warehouses.$id'
@@ -37,6 +38,11 @@ const LoginRoute = LoginRouteImport.update({
 const InventoryRoute = InventoryRouteImport.update({
   id: '/inventory',
   path: '/inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegrationsRoute = IntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CatalogRoute = CatalogRouteImport.update({
@@ -68,6 +74,7 @@ const PalletsIdRoute = PalletsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/integrations': typeof IntegrationsRoute
   '/inventory': typeof InventoryRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
@@ -79,6 +86,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/integrations': typeof IntegrationsRoute
   '/inventory': typeof InventoryRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
@@ -91,6 +99,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/catalog': typeof CatalogRoute
+  '/integrations': typeof IntegrationsRoute
   '/inventory': typeof InventoryRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/catalog'
+    | '/integrations'
     | '/inventory'
     | '/login'
     | '/signup'
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/catalog'
+    | '/integrations'
     | '/inventory'
     | '/login'
     | '/signup'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/catalog'
+    | '/integrations'
     | '/inventory'
     | '/login'
     | '/signup'
@@ -138,6 +150,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CatalogRoute: typeof CatalogRoute
+  IntegrationsRoute: typeof IntegrationsRoute
   InventoryRoute: typeof InventoryRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
@@ -174,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/inventory'
       fullPath: '/inventory'
       preLoaderRoute: typeof InventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integrations': {
+      id: '/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof IntegrationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/catalog': {
@@ -229,6 +249,7 @@ const WarehousesRouteWithChildren = WarehousesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CatalogRoute: CatalogRoute,
+  IntegrationsRoute: IntegrationsRoute,
   InventoryRoute: InventoryRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
@@ -239,3 +260,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

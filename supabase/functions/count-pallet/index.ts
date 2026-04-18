@@ -74,7 +74,8 @@ Rules:
     });
 
     if (resp.status === 429) return json({ error: "Rate limit exceeded. Try again shortly." }, 429);
-    if (resp.status === 402) return json({ error: "AI credits exhausted. Add funds in workspace settings." }, 402);
+    if (resp.status === 402)
+      return json({ error: "AI credits exhausted. Add funds in workspace settings." }, 402);
     if (!resp.ok) {
       const t = await resp.text();
       console.error("AI gateway error", resp.status, t);

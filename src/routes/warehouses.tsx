@@ -47,7 +47,10 @@ function WarehousesPage() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from("warehouses").select("id,name,address,notes").order("name");
+    const { data, error } = await supabase
+      .from("warehouses")
+      .select("id,name,address,notes")
+      .order("name");
     if (error) toast.error(error.message);
     setItems(data ?? []);
     setLoading(false);
@@ -60,7 +63,9 @@ function WarehousesPage() {
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const { error } = await supabase.from("warehouses").insert({ name, address: address || null, notes: notes || null });
+    const { error } = await supabase
+      .from("warehouses")
+      .insert({ name, address: address || null, notes: notes || null });
     setSaving(false);
     if (error) {
       toast.error(error.message);
@@ -95,7 +100,12 @@ function WarehousesPage() {
               <form onSubmit={create} className="space-y-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="wname">Name</Label>
-                  <Input id="wname" value={name} onChange={(e) => setName(e.target.value)} required />
+                  <Input
+                    id="wname"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="waddr">Address</Label>

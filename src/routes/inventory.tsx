@@ -5,7 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { Download, Search } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -39,7 +46,9 @@ function InventoryPage() {
     void (async () => {
       const { data } = await supabase
         .from("pallets")
-        .select("id, final_count, ai_count, status, captured_at, upc, warehouses(name), products(name, brand)")
+        .select(
+          "id, final_count, ai_count, status, captured_at, upc, warehouses(name), products(name, brand)",
+        )
         .order("captured_at", { ascending: false });
       setRows((data as unknown as Row[]) ?? []);
       setLoading(false);
@@ -126,16 +135,29 @@ function InventoryPage() {
                 {filtered.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell>
-                      <Link to="/pallets/$id" params={{ id: r.id }} className="font-medium hover:underline">
+                      <Link
+                        to="/pallets/$id"
+                        params={{ id: r.id }}
+                        className="font-medium hover:underline"
+                      >
                         {r.products?.name ?? "Unknown"}
                       </Link>
                       <p className="text-xs text-muted-foreground">{r.products?.brand}</p>
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell text-sm">{r.warehouses?.name ?? "—"}</TableCell>
-                    <TableCell className="hidden md:table-cell font-mono text-xs">{r.upc ?? "—"}</TableCell>
-                    <TableCell className="text-right font-semibold">{r.final_count ?? r.ai_count ?? "—"}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-sm">
+                      {r.warehouses?.name ?? "—"}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell font-mono text-xs">
+                      {r.upc ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">
+                      {r.final_count ?? r.ai_count ?? "—"}
+                    </TableCell>
                     <TableCell className="hidden sm:table-cell">
-                      <Badge variant={r.status === "confirmed" ? "default" : "secondary"} className="text-[10px]">
+                      <Badge
+                        variant={r.status === "confirmed" ? "default" : "secondary"}
+                        className="text-[10px]"
+                      >
                         {r.status}
                       </Badge>
                     </TableCell>
@@ -143,7 +165,10 @@ function InventoryPage() {
                 ))}
                 {filtered.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
+                    <TableCell
+                      colSpan={5}
+                      className="py-8 text-center text-sm text-muted-foreground"
+                    >
                       No pallets found.
                     </TableCell>
                   </TableRow>

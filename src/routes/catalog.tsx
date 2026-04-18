@@ -30,7 +30,10 @@ function CatalogPage() {
 
   useEffect(() => {
     void (async () => {
-      const { data } = await supabase.from("products").select("id,upc,name,brand,image_url").order("name");
+      const { data } = await supabase
+        .from("products")
+        .select("id,upc,name,brand,image_url")
+        .order("name");
       setProducts(data ?? []);
       setLoading(false);
     })();
@@ -53,7 +56,12 @@ function CatalogPage() {
       </div>
       <div className="relative max-w-md">
         <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…" className="pl-9" />
+        <Input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search…"
+          className="pl-9"
+        />
       </div>
 
       {loading ? (
@@ -62,7 +70,9 @@ function CatalogPage() {
         <Card>
           <CardContent className="py-12 text-center">
             <Package className="mx-auto h-8 w-8 text-muted-foreground" />
-            <p className="mt-3 text-sm text-muted-foreground">No products yet. Scan a UPC to add one.</p>
+            <p className="mt-3 text-sm text-muted-foreground">
+              No products yet. Scan a UPC to add one.
+            </p>
           </CardContent>
         </Card>
       ) : (
@@ -74,8 +84,11 @@ function CatalogPage() {
               </CardHeader>
               <CardContent>
                 {p.image_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.image_url} alt={p.name} className="mb-2 h-24 w-24 rounded object-contain" />
+                  <img
+                    src={p.image_url}
+                    alt={p.name}
+                    className="mb-2 h-24 w-24 rounded object-contain"
+                  />
                 )}
                 <p className="text-sm text-muted-foreground">{p.brand ?? "—"}</p>
                 <p className="mt-1 font-mono text-xs">{p.upc}</p>

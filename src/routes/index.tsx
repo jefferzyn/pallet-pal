@@ -50,7 +50,9 @@ function Dashboard() {
       supabase.from("pallets").select("final_count, ai_confidence"),
       supabase
         .from("pallets")
-        .select("id, final_count, ai_count, ai_confidence, status, captured_at, warehouses(name), products(name, upc)")
+        .select(
+          "id, final_count, ai_count, ai_confidence, status, captured_at, warehouses(name), products(name, upc)",
+        )
         .order("captured_at", { ascending: false })
         .limit(8),
     ]);
@@ -81,9 +83,24 @@ function Dashboard() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard icon={<Warehouse className="h-4 w-4" />} label="Warehouses" value={stats?.warehouses ?? 0} loading={loading} />
-        <StatCard icon={<Boxes className="h-4 w-4" />} label="Pallets" value={stats?.pallets ?? 0} loading={loading} />
-        <StatCard icon={<Package className="h-4 w-4" />} label="Total boxes" value={stats?.totalBoxes ?? 0} loading={loading} />
+        <StatCard
+          icon={<Warehouse className="h-4 w-4" />}
+          label="Warehouses"
+          value={stats?.warehouses ?? 0}
+          loading={loading}
+        />
+        <StatCard
+          icon={<Boxes className="h-4 w-4" />}
+          label="Pallets"
+          value={stats?.pallets ?? 0}
+          loading={loading}
+        />
+        <StatCard
+          icon={<Package className="h-4 w-4" />}
+          label="Total boxes"
+          value={stats?.totalBoxes ?? 0}
+          loading={loading}
+        />
         <StatCard
           icon={<AlertTriangle className="h-4 w-4 text-destructive" />}
           label="Low confidence"
@@ -111,7 +128,11 @@ function Dashboard() {
               {recent.map((p) => (
                 <li key={p.id} className="flex items-center gap-3 py-3">
                   <div className="min-w-0 flex-1">
-                    <Link to="/pallets/$id" params={{ id: p.id }} className="block truncate font-medium hover:underline">
+                    <Link
+                      to="/pallets/$id"
+                      params={{ id: p.id }}
+                      className="block truncate font-medium hover:underline"
+                    >
                       {p.products?.name ?? "Unknown product"}
                     </Link>
                     <p className="truncate text-xs text-muted-foreground">
@@ -120,7 +141,10 @@ function Dashboard() {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">{p.final_count ?? p.ai_count ?? "—"}</p>
-                    <Badge variant={p.status === "confirmed" ? "default" : "secondary"} className="text-[10px]">
+                    <Badge
+                      variant={p.status === "confirmed" ? "default" : "secondary"}
+                      className="text-[10px]"
+                    >
                       {p.status}
                     </Badge>
                   </div>

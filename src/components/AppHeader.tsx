@@ -1,14 +1,18 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Boxes, LayoutDashboard, Warehouse, Package, BookOpen, LogOut, Plus, Menu } from "lucide-react";
+import {
+  Boxes,
+  LayoutDashboard,
+  Warehouse,
+  Package,
+  BookOpen,
+  LogOut,
+  Plus,
+  Menu,
+  Zap,
+} from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 
 const navItems = [
@@ -16,6 +20,7 @@ const navItems = [
   { to: "/warehouses", label: "Warehouses", icon: Warehouse },
   { to: "/inventory", label: "Inventory", icon: Package },
   { to: "/catalog", label: "Catalog", icon: BookOpen },
+  { to: "/integrations", label: "Integrations", icon: Zap },
 ] as const;
 
 export function AppHeader() {
@@ -62,7 +67,13 @@ export function AppHeader() {
             </Link>
           </Button>
           <span className="hidden text-xs text-muted-foreground lg:inline">{user?.email}</span>
-          <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sign out" className="hidden md:inline-flex">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleSignOut}
+            aria-label="Sign out"
+            className="hidden md:inline-flex"
+          >
             <LogOut className="h-4 w-4" />
           </Button>
 

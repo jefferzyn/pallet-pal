@@ -32,7 +32,10 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1" },
       { title: "PalletCount — Inventory" },
-      { name: "description", content: "Pallet inventory counter using barcode scanning and AI vision." },
+      {
+        name: "description",
+        content: "Pallet inventory counter using barcode scanning and AI vision.",
+      },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),

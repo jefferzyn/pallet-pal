@@ -54,7 +54,10 @@ function WarehouseDetail() {
 
   return (
     <div className="space-y-6">
-      <Link to="/warehouses" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link
+        to="/warehouses"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="h-4 w-4" /> Warehouses
       </Link>
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -77,20 +80,31 @@ function WarehouseDetail() {
           {loading ? (
             <p className="text-sm text-muted-foreground">Loading…</p>
           ) : pallets.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">No pallets recorded yet.</p>
+            <p className="py-6 text-center text-sm text-muted-foreground">
+              No pallets recorded yet.
+            </p>
           ) : (
             <ul className="divide-y">
               {pallets.map((p) => (
                 <li key={p.id} className="flex items-center gap-3 py-3">
                   <div className="min-w-0 flex-1">
-                    <Link to="/pallets/$id" params={{ id: p.id }} className="block truncate font-medium hover:underline">
+                    <Link
+                      to="/pallets/$id"
+                      params={{ id: p.id }}
+                      className="block truncate font-medium hover:underline"
+                    >
                       {p.products?.name ?? "Unknown product"}
                     </Link>
-                    <p className="text-xs text-muted-foreground">{new Date(p.captured_at).toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(p.captured_at).toLocaleString()}
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">{p.final_count ?? p.ai_count ?? "—"}</p>
-                    <Badge variant={p.status === "confirmed" ? "default" : "secondary"} className="text-[10px]">
+                    <Badge
+                      variant={p.status === "confirmed" ? "default" : "secondary"}
+                      className="text-[10px]"
+                    >
                       {p.status}
                     </Badge>
                   </div>

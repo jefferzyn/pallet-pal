@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { RequireAuth } from "@/components/RequireAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +13,18 @@ import { useAuth } from "@/lib/auth-context";
 import { lookupUpc } from "@/lib/upc-lookup";
 import { extractFrames } from "@/lib/video-frames";
 import { toast } from "sonner";
-import { Boxes, Camera, CheckCircle2, Loader2, Minus, Plus, RefreshCw, Sparkles, Upload, Video } from "lucide-react";
+import {
+  Boxes,
+  Camera,
+  CheckCircle2,
+  Loader2,
+  Minus,
+  Plus,
+  RefreshCw,
+  Sparkles,
+  Upload,
+  Video,
+} from "lucide-react";
 
 export const Route = createFileRoute("/pallets/new")({
   head: () => ({ meta: [{ title: "New pallet — PalletCount" }] }),
@@ -82,9 +93,12 @@ function NewPallet() {
       .then(({ data }) => setWarehouses(data ?? []));
   }, []);
 
-  useEffect(() => () => {
-    if (videoUrl) URL.revokeObjectURL(videoUrl);
-  }, [videoUrl]);
+  useEffect(
+    () => () => {
+      if (videoUrl) URL.revokeObjectURL(videoUrl);
+    },
+    [videoUrl],
+  );
 
   const handleScan = async (code: string) => {
     setUpc(code);
@@ -108,7 +122,12 @@ function NewPallet() {
       }
       const looked = await lookupUpc(code);
       if (looked) {
-        setProduct({ upc: code, name: looked.name, brand: looked.brand ?? null, image_url: looked.image_url ?? null });
+        setProduct({
+          upc: code,
+          name: looked.name,
+          brand: looked.brand ?? null,
+          image_url: looked.image_url ?? null,
+        });
         setManualName(looked.name);
         setManualBrand(looked.brand ?? "");
       } else {
@@ -131,7 +150,12 @@ function NewPallet() {
     const { data, error } = await supabase
       .from("products")
       .upsert(
-        { upc, name: manualName.trim(), brand: manualBrand.trim() || null, image_url: product?.image_url ?? null },
+        {
+          upc,
+          name: manualName.trim(),
+          brand: manualBrand.trim() || null,
+          image_url: product?.image_url ?? null,
+        },
         { onConflict: "upc" },
       )
       .select("id,upc,name,brand,image_url")
@@ -242,9 +266,23 @@ function NewPallet() {
           </CardHeader>
           <CardContent className="space-y-3">
             {warehouses.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No warehouses available. Ask a manager to create one or assign you.
-              </p>
+              <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                <p className="text-sm font-medium text-amber-900">No warehouses assigned to you</p>
+                <p className="text-xs text-amber-800">
+                  You don't have access to any warehouses yet. Contact your manager or administrator
+                  to:
+                </p>
+                <ul className="space-y-1 text-xs text-amber-800">
+                  <li>• Create a warehouse (if none exist)</li>
+                  <li>• Assign you to an existing warehouse</li>
+                </ul>
+                <Link
+                  to="/warehouses"
+                  className="inline-block text-xs font-medium text-amber-700 underline hover:text-amber-900"
+                >
+                  View warehouses
+                </Link>
+              </div>
             ) : (
               <div className="grid gap-2">
                 {warehouses.map((w) => (
@@ -260,7 +298,12 @@ function NewPallet() {
                 ))}
               </div>
             )}
-            <Button className="w-full" disabled={!warehouseId} onClick={() => setStep("barcode")} size="lg">
+            <Button
+              className="w-full"
+              disabled={!warehouseId}
+              onClick={() => setStep("barcode")}
+              size="lg"
+            >
               Continue
             </Button>
           </CardContent>
@@ -289,7 +332,12 @@ function NewPallet() {
               }}
               className="flex gap-2"
             >
-              <Input value={upc} onChange={(e) => setUpc(e.target.value)} placeholder="UPC code" inputMode="numeric" />
+              <Input
+                value={upc}
+                onChange={(e) => setUpc(e.target.value)}
+                placeholder="UPC code"
+                inputMode="numeric"
+              />
               <Button type="submit">Use</Button>
             </form>
           </CardContent>
@@ -310,15 +358,27 @@ function NewPallet() {
             ) : (
               <>
                 {product?.image_url && (
-                  <img src={product.image_url} alt="" className="h-24 w-24 rounded border object-contain" />
+                  <img
+                    src={product.image_url}
+                    alt=""
+                    className="h-24 w-24 rounded border object-contain"
+                  />
                 )}
                 <div className="space-y-1.5">
                   <Label htmlFor="pname">Name</Label>
-                  <Input id="pname" value={manualName} onChange={(e) => setManualName(e.target.value)} />
+                  <Input
+                    id="pname"
+                    value={manualName}
+                    onChange={(e) => setManualName(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="pbrand">Brand</Label>
-                  <Input id="pbrand" value={manualBrand} onChange={(e) => setManualBrand(e.target.value)} />
+                  <Input
+                    id="pbrand"
+                    value={manualBrand}
+                    onChange={(e) => setManualBrand(e.target.value)}
+                  />
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => setStep("barcode")}>
@@ -390,7 +450,9 @@ function NewPallet() {
           <CardContent className="space-y-4">
             <div className="rounded-lg border bg-muted/30 p-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium uppercase text-muted-foreground">AI estimate</span>
+                <span className="text-xs font-medium uppercase text-muted-foreground">
+                  AI estimate
+                </span>
                 <Badge variant={ai.confidence < 0.6 ? "destructive" : "secondary"}>
                   {Math.round(ai.confidence * 100)}% confidence
                 </Badge>
@@ -407,7 +469,11 @@ function NewPallet() {
             <div className="space-y-2">
               <Label>Final count (verify before confirming)</Label>
               <div className="flex items-center gap-2">
-                <Button size="icon" variant="outline" onClick={() => setFinalCount((v) => Math.max(0, v - 1))}>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={() => setFinalCount((v) => Math.max(0, v - 1))}
+                >
                   <Minus className="h-4 w-4" />
                 </Button>
                 <Input
@@ -424,7 +490,12 @@ function NewPallet() {
 
             <div className="space-y-1.5">
               <Label htmlFor="notes">Notes (optional)</Label>
-              <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
+              <Textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={2}
+              />
             </div>
 
             <div className="flex gap-2">
@@ -470,7 +541,9 @@ function Stepper({ step }: { step: Step }) {
           >
             {i + 1}
           </div>
-          {i < steps.length - 1 && <div className={`h-0.5 flex-1 ${i < idx ? "bg-primary" : "bg-muted"}`} />}
+          {i < steps.length - 1 && (
+            <div className={`h-0.5 flex-1 ${i < idx ? "bg-primary" : "bg-muted"}`} />
+          )}
         </div>
       ))}
     </div>
