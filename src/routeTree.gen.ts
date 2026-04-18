@@ -9,38 +9,180 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WarehousesRouteImport } from './routes/warehouses'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as InventoryRouteImport } from './routes/inventory'
+import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WarehousesIdRouteImport } from './routes/warehouses.$id'
+import { Route as PalletsNewRouteImport } from './routes/pallets.new'
+import { Route as PalletsIdRouteImport } from './routes/pallets.$id'
 
+const WarehousesRoute = WarehousesRouteImport.update({
+  id: '/warehouses',
+  path: '/warehouses',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventoryRoute = InventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogRoute = CatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WarehousesIdRoute = WarehousesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => WarehousesRoute,
+} as any)
+const PalletsNewRoute = PalletsNewRouteImport.update({
+  id: '/pallets/new',
+  path: '/pallets/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PalletsIdRoute = PalletsIdRouteImport.update({
+  id: '/pallets/$id',
+  path: '/pallets/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/catalog': typeof CatalogRoute
+  '/inventory': typeof InventoryRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/warehouses': typeof WarehousesRouteWithChildren
+  '/pallets/$id': typeof PalletsIdRoute
+  '/pallets/new': typeof PalletsNewRoute
+  '/warehouses/$id': typeof WarehousesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/catalog': typeof CatalogRoute
+  '/inventory': typeof InventoryRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/warehouses': typeof WarehousesRouteWithChildren
+  '/pallets/$id': typeof PalletsIdRoute
+  '/pallets/new': typeof PalletsNewRoute
+  '/warehouses/$id': typeof WarehousesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/catalog': typeof CatalogRoute
+  '/inventory': typeof InventoryRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/warehouses': typeof WarehousesRouteWithChildren
+  '/pallets/$id': typeof PalletsIdRoute
+  '/pallets/new': typeof PalletsNewRoute
+  '/warehouses/$id': typeof WarehousesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/catalog'
+    | '/inventory'
+    | '/login'
+    | '/signup'
+    | '/warehouses'
+    | '/pallets/$id'
+    | '/pallets/new'
+    | '/warehouses/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/catalog'
+    | '/inventory'
+    | '/login'
+    | '/signup'
+    | '/warehouses'
+    | '/pallets/$id'
+    | '/pallets/new'
+    | '/warehouses/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/catalog'
+    | '/inventory'
+    | '/login'
+    | '/signup'
+    | '/warehouses'
+    | '/pallets/$id'
+    | '/pallets/new'
+    | '/warehouses/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CatalogRoute: typeof CatalogRoute
+  InventoryRoute: typeof InventoryRoute
+  LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
+  WarehousesRoute: typeof WarehousesRouteWithChildren
+  PalletsIdRoute: typeof PalletsIdRoute
+  PalletsNewRoute: typeof PalletsNewRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/warehouses': {
+      id: '/warehouses'
+      path: '/warehouses'
+      fullPath: '/warehouses'
+      preLoaderRoute: typeof WarehousesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventory': {
+      id: '/inventory'
+      path: '/inventory'
+      fullPath: '/inventory'
+      preLoaderRoute: typeof InventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalog': {
+      id: '/catalog'
+      path: '/catalog'
+      fullPath: '/catalog'
+      preLoaderRoute: typeof CatalogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +190,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/warehouses/$id': {
+      id: '/warehouses/$id'
+      path: '/$id'
+      fullPath: '/warehouses/$id'
+      preLoaderRoute: typeof WarehousesIdRouteImport
+      parentRoute: typeof WarehousesRoute
+    }
+    '/pallets/new': {
+      id: '/pallets/new'
+      path: '/pallets/new'
+      fullPath: '/pallets/new'
+      preLoaderRoute: typeof PalletsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pallets/$id': {
+      id: '/pallets/$id'
+      path: '/pallets/$id'
+      fullPath: '/pallets/$id'
+      preLoaderRoute: typeof PalletsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface WarehousesRouteChildren {
+  WarehousesIdRoute: typeof WarehousesIdRoute
+}
+
+const WarehousesRouteChildren: WarehousesRouteChildren = {
+  WarehousesIdRoute: WarehousesIdRoute,
+}
+
+const WarehousesRouteWithChildren = WarehousesRoute._addFileChildren(
+  WarehousesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CatalogRoute: CatalogRoute,
+  InventoryRoute: InventoryRoute,
+  LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
+  WarehousesRoute: WarehousesRouteWithChildren,
+  PalletsIdRoute: PalletsIdRoute,
+  PalletsNewRoute: PalletsNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
