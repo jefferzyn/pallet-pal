@@ -29,7 +29,7 @@
 
 ### Key technical decisions
 
-- **AI counting**: Lovable AI Gateway with `google/gemini-2.5-pro` (multimodal vision). Extract ~6–10 frames from the video server-side, send to Gemini with a structured prompt → JSON `{ estimated_count, confidence, reasoning, visible_boxes_per_face }`. Always show this as a **suggestion**, never silently authoritative.
+- **AI counting**: AI Gateway with `google/gemini-2.5-pro` (multimodal vision). Extract ~6–10 frames from the video server-side, send to Gemini with a structured prompt → JSON `{ estimated_count, confidence, reasoning, visible_boxes_per_face }`. Always show this as a **suggestion**, never silently authoritative.
 - **Barcode scanning**: `@zxing/browser` library — works on mobile + desktop webcam, no native install.
 - **UPC lookup**: UPCItemDB free tier (no key) with fallback to manual entry; results cached in our `products` catalog table.
 - **Video storage**: Lovable Cloud storage bucket (private), 30s max, compressed client-side before upload.
