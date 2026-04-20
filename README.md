@@ -11,7 +11,7 @@
 
 ### Pages / routes
 
-- `/login` + `/signup` — email auth (Lovable Cloud)
+- `/login` + `/signup` — email auth (Cloud)
 - `/` — Dashboard: total inventory, recent pallets, low-detection alerts
 - `/warehouses` — list/create warehouses, locations, zones
 - `/warehouses/$id` — pallets in this warehouse
