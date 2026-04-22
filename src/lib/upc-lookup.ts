@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 // UPC/EAN/ISBN product info lookup via Barcode Lookup API.
 // Supports UPC, EAN-13, EAN-8, ISBN-10, ISBN-13, JAN, and ITF-14 formats.
 export interface UpcResult {
@@ -12,6 +14,7 @@ export interface UpcResult {
  * Looks up product information using Barcode Lookup API.
  * Requires VITE_BARCODE_LOOKUP_API_KEY environment variable.
  * Falls back to UPCItemDB if Barcode Lookup is unavailable or unconfigured.
+ * Automatically saves successful lookups to the database.
  */
 export async function lookupUpc(upc: string): Promise<UpcResult | null> {
   const apiKey = import.meta.env.VITE_BARCODE_LOOKUP_API_KEY;
@@ -20,7 +23,10 @@ export async function lookupUpc(upc: string): Promise<UpcResult | null> {
   if (apiKey) {
     try {
       const result = await lookupBarcodeLookup(upc, apiKey);
-      if (result) return result;
+      if (result) {
+        await saveProductToDatabase(result);
+        return result;
+      }
     } catch (e) {
       console.warn("Barcode Lookup API failed, trying fallback", e);
     }
@@ -29,12 +35,65 @@ export async function lookupUpc(upc: string): Promise<UpcResult | null> {
   // Fallback to UPCItemDB free trial
   try {
     const result = await lookupUpcItemDb(upc);
-    if (result) return result;
+    if (result) {
+      await saveProductToDatabase(result);
+      return result;
+    }
   } catch (e) {
     console.warn("UPC lookup failed", e);
   }
 
   return null;
+}
+
+/**
+ * Saves or updates a product in the database after lookup.
+ */
+async function saveProductToDatabase(product: UpcResult): Promise<void> {
+  try {
+    // Check if product already exists
+    const { data: existing, error: selectError } = await supabase
+      .from("products")
+      .select("id")
+      .eq("upc", product.upc)
+      .single();
+
+    if (existing) {
+      // Update existing product
+      const { error: updateError } = await supabase
+        .from("products")
+        .update({
+          name: product.name,
+          brand: product.brand,
+          image_url: product.image_url,
+        })
+        .eq("upc", product.upc);
+
+      if (updateError) {
+        console.warn("Failed to update product in database:", updateError);
+      }
+    } else {
+      // Insert new product (ignore if it was just created by another request)
+      const { error: insertError } = await supabase
+        .from("products")
+        .insert({
+          upc: product.upc,
+          name: product.name,
+          brand: product.brand,
+          image_url: product.image_url,
+        })
+        .select()
+        .single()
+        .catch(() => ({ data: null, error: null })); // Ignore unique constraint errors
+
+      if (insertError && insertError.code !== "23505") {
+        // 23505 is unique constraint error, which is fine
+        console.warn("Failed to insert product into database:", insertError);
+      }
+    }
+  } catch (e) {
+    console.warn("Error saving product to database:", e);
+  }
 }
 
 /**

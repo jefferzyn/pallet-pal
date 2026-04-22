@@ -9,6 +9,7 @@ import {
   Plus,
   Menu,
   Zap,
+  Film,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/warehouses", label: "Warehouses", icon: Warehouse },
   { to: "/inventory", label: "Inventory", icon: Package },
+  { to: "/videos", label: "Videos", icon: Film },
   { to: "/catalog", label: "Catalog", icon: BookOpen },
   { to: "/integrations", label: "Integrations", icon: Zap },
 ] as const;

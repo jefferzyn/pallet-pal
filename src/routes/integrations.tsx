@@ -70,14 +70,6 @@ function IntegrationsPage() {
       connected: false,
       category: "erp",
     },
-    {
-      id: "api",
-      name: "Custom API",
-      description: "Build custom integrations using our REST API",
-      icon: "🔌",
-      connected: false,
-      category: "inventory",
-    },
   ]);
 
   const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null);
@@ -144,34 +136,6 @@ function IntegrationsPage() {
           Connect PalletPal with your inventory, accounting, and e-commerce systems.
         </p>
       </div>
-
-      {/* API Documentation Card */}
-      <Card className="border-blue-200 bg-blue-50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <span>🔌</span> API Access
-          </CardTitle>
-          <CardDescription>
-            Use our REST API to build custom integrations or sync data programmatically.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <Label className="text-sm font-medium">Base URL</Label>
-              <code className="block bg-white rounded p-2 text-sm mt-1 border">
-                https://tanstack-start-app.workers.dev/api
-              </code>
-            </div>
-            <div>
-              <Label className="text-sm font-medium">Documentation</Label>
-              <Button variant="outline" size="sm" className="mt-2">
-                View API Docs
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Integrations by Category */}
       {categories.map((category) => {
