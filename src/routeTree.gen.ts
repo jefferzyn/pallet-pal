@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WarehousesRouteImport } from './routes/warehouses'
+import { Route as VideosRouteImport } from './routes/videos'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as InventoryRouteImport } from './routes/inventory'
@@ -23,6 +24,11 @@ import { Route as PalletsIdRouteImport } from './routes/pallets.$id'
 const WarehousesRoute = WarehousesRouteImport.update({
   id: '/warehouses',
   path: '/warehouses',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VideosRoute = VideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/inventory': typeof InventoryRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/videos': typeof VideosRoute
   '/warehouses': typeof WarehousesRouteWithChildren
   '/pallets/$id': typeof PalletsIdRoute
   '/pallets/new': typeof PalletsNewRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/inventory': typeof InventoryRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/videos': typeof VideosRoute
   '/warehouses': typeof WarehousesRouteWithChildren
   '/pallets/$id': typeof PalletsIdRoute
   '/pallets/new': typeof PalletsNewRoute
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/inventory': typeof InventoryRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/videos': typeof VideosRoute
   '/warehouses': typeof WarehousesRouteWithChildren
   '/pallets/$id': typeof PalletsIdRoute
   '/pallets/new': typeof PalletsNewRoute
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/login'
     | '/signup'
+    | '/videos'
     | '/warehouses'
     | '/pallets/$id'
     | '/pallets/new'
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/login'
     | '/signup'
+    | '/videos'
     | '/warehouses'
     | '/pallets/$id'
     | '/pallets/new'
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/login'
     | '/signup'
+    | '/videos'
     | '/warehouses'
     | '/pallets/$id'
     | '/pallets/new'
@@ -154,6 +166,7 @@ export interface RootRouteChildren {
   InventoryRoute: typeof InventoryRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
+  VideosRoute: typeof VideosRoute
   WarehousesRoute: typeof WarehousesRouteWithChildren
   PalletsIdRoute: typeof PalletsIdRoute
   PalletsNewRoute: typeof PalletsNewRoute
@@ -166,6 +179,13 @@ declare module '@tanstack/react-router' {
       path: '/warehouses'
       fullPath: '/warehouses'
       preLoaderRoute: typeof WarehousesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/videos': {
+      id: '/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof VideosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -253,6 +273,7 @@ const rootRouteChildren: RootRouteChildren = {
   InventoryRoute: InventoryRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
+  VideosRoute: VideosRoute,
   WarehousesRoute: WarehousesRouteWithChildren,
   PalletsIdRoute: PalletsIdRoute,
   PalletsNewRoute: PalletsNewRoute,

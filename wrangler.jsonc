@@ -1,7 +1,13 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "tanstack-start-app",
+  "name": "pallet-pal",
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
+  // Cloudflare must define these runtime/build variables:
+  // - SUPABASE_URL
+  // - SUPABASE_PUBLISHABLE_KEY
+  // - VITE_SUPABASE_URL
+  // - VITE_SUPABASE_PUBLISHABLE_KEY
+  // Keep SUPABASE_SERVICE_ROLE_KEY as a secret only if a trusted server route needs it.
 }
