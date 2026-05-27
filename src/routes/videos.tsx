@@ -92,12 +92,7 @@ function VideosPage() {
   if (selectedVideo) {
     return (
       <div className="space-y-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSelectedVideo(null)}
-          className="mb-4"
-        >
+        <Button variant="outline" size="sm" onClick={() => setSelectedVideo(null)} className="mb-4">
           <ChevronLeft className="h-4 w-4 mr-2" />
           Back to Videos
         </Button>
@@ -106,16 +101,13 @@ function VideosPage() {
           <CardHeader>
             <CardTitle>{selectedVideo.product_name || `UPC: ${selectedVideo.upc}`}</CardTitle>
             <CardDescription>
-              {selectedVideo.warehouse_name} • {new Date(selectedVideo.captured_at).toLocaleDateString()}
+              {selectedVideo.warehouse_name}{" "}
+              {new Date(selectedVideo.captured_at).toLocaleDateString()}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {selectedVideo.signedUrl ? (
-              <video
-                controls
-                className="w-full rounded-lg bg-black"
-                style={{ maxHeight: "500px" }}
-              >
+              <video controls className="w-full rounded-lg bg-black" style={{ maxHeight: "500px" }}>
                 <source src={selectedVideo.signedUrl} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>

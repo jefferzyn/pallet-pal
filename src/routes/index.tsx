@@ -45,27 +45,34 @@ function Dashboard() {
 
   const load = async () => {
     setLoading(true);
-    const [whRes, palletsRes, recentRes] = await Promise.all([
-      supabase.from("warehouses").select("id", { count: "exact", head: true }),
-      supabase.from("pallets").select("final_count, ai_confidence"),
-      supabase
-        .from("pallets")
-        .select(
-          "id, final_count, ai_count, ai_confidence, status, captured_at, warehouses(name), products(name, upc)",
-        )
-        .order("captured_at", { ascending: false })
-        .limit(8),
-    ]);
+    try {
+      const [whRes, palletsRes, recentRes] = await Promise.all([
+        supabase.from("warehouses").select("id", { count: "exact", head: true }),
+        supabase.from("pallets").select("final_count, ai_confidence"),
+        supabase
+          .from("pallets")
+          .select(
+            "id, final_count, ai_count, ai_confidence, status, captured_at, warehouses(name), products(name, upc)",
+          )
+          .order("captured_at", { ascending: false })
+          .limit(8),
+      ]);
 
-    const pallets = palletsRes.data ?? [];
-    setStats({
-      warehouses: whRes.count ?? 0,
-      pallets: pallets.length,
-      totalBoxes: pallets.reduce((s, p) => s + (p.final_count ?? 0), 0),
-      lowConfidence: pallets.filter((p) => (p.ai_confidence ?? 1) < 0.6).length,
-    });
-    setRecent((recentRes.data as unknown as RecentPallet[]) ?? []);
-    setLoading(false);
+      const pallets = palletsRes.data ?? [];
+      setStats({
+        warehouses: whRes.count ?? 0,
+        pallets: pallets.length,
+        totalBoxes: pallets.reduce((s, p) => s + (p.final_count ?? 0), 0),
+        lowConfidence: pallets.filter((p) => (p.ai_confidence ?? 1) < 0.6).length,
+      });
+      setRecent((recentRes.data as unknown as RecentPallet[]) ?? []);
+    } catch (error) {
+      console.error("Unable to load dashboard data", error);
+      setStats({ warehouses: 0, pallets: 0, totalBoxes: 0, lowConfidence: 0 });
+      setRecent([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

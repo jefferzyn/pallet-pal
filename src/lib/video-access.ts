@@ -15,6 +15,34 @@ export interface VideoRecord {
   notes: string | null;
 }
 
+interface PalletVideoRow {
+  id: string;
+  upc: string | null;
+  video_path: string | null;
+  captured_at: string;
+  ai_count: number | null;
+  final_count: number | null;
+  status: string;
+  notes: string | null;
+  products: { name: string | null } | null;
+  warehouses: { name: string | null } | null;
+}
+
+function toVideoRecord(pallet: PalletVideoRow): VideoRecord {
+  return {
+    id: pallet.id,
+    upc: pallet.upc,
+    product_name: pallet.products?.name || null,
+    warehouse_name: pallet.warehouses?.name || null,
+    video_path: pallet.video_path,
+    captured_at: pallet.captured_at,
+    ai_count: pallet.ai_count,
+    final_count: pallet.final_count,
+    status: pallet.status,
+    notes: pallet.notes,
+  };
+}
+
 /**
  * Fetch all pallet videos accessible to the current user
  * Returns videos from pallets the user has access to (via warehouse assignments)
@@ -62,18 +90,7 @@ export async function getUserPalletVideos(): Promise<VideoRecord[]> {
   }
 
   // Convert to VideoRecord format
-  const videos: VideoRecord[] = pallets.map((pallet: any) => ({
-    id: pallet.id,
-    upc: pallet.upc,
-    product_name: pallet.products?.name || null,
-    warehouse_name: pallet.warehouses?.name || null,
-    video_path: pallet.video_path,
-    captured_at: pallet.captured_at,
-    ai_count: pallet.ai_count,
-    final_count: pallet.final_count,
-    status: pallet.status,
-    notes: pallet.notes,
-  }));
+  const videos: VideoRecord[] = (pallets as PalletVideoRow[]).map(toVideoRecord);
 
   return videos;
 }
@@ -115,18 +132,7 @@ export async function getWarehouseVideos(warehouseId: string): Promise<VideoReco
     return [];
   }
 
-  const videos: VideoRecord[] = pallets.map((pallet: any) => ({
-    id: pallet.id,
-    upc: pallet.upc,
-    product_name: pallet.products?.name || null,
-    warehouse_name: pallet.warehouses?.name || null,
-    video_path: pallet.video_path,
-    captured_at: pallet.captured_at,
-    ai_count: pallet.ai_count,
-    final_count: pallet.final_count,
-    status: pallet.status,
-    notes: pallet.notes,
-  }));
+  const videos: VideoRecord[] = (pallets as PalletVideoRow[]).map(toVideoRecord);
 
   return videos;
 }
