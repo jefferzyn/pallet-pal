@@ -24,6 +24,20 @@ interface AuthState {
 
 const AuthContext = React.createContext<AuthState | null>(null);
 const DEMO_SESSION_KEY = "pallet-pal-demo-session";
+const AUTH_REQUEST_TIMEOUT_MS = 4000;
+const ROLE_REQUEST_TIMEOUT_MS = 4000;
+
+function withTimeout<T>(request: PromiseLike<T>, ms: number, message: string) {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), ms);
+  });
+
+  return Promise.race([Promise.resolve(request), timeout]).finally(() => {
+    if (timeoutId) clearTimeout(timeoutId);
+  });
+}
 
 function isNetworkError(error: unknown) {
   return (
@@ -102,8 +116,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = React.useState(true);
 
   const loadRoles = React.useCallback(async (uid: string) => {
-    const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
-    setRoles((data ?? []).map((r) => r.role as AppRole));
+    try {
+      const { data } = await withTimeout(
+        supabase.from("user_roles").select("role").eq("user_id", uid),
+        ROLE_REQUEST_TIMEOUT_MS,
+        "Role request timed out",
+      );
+      setRoles((data ?? []).map((r) => r.role as AppRole));
+    } catch (error) {
+      console.error("Unable to load roles", error);
+      setRoles([]);
+    }
   }, []);
 
   React.useEffect(() => {
@@ -116,8 +139,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setRoles([]);
       }
     });
-    supabase.auth
-      .getSession()
+    withTimeout(
+      supabase.auth.getSession(),
+      AUTH_REQUEST_TIMEOUT_MS,
+      "Auth session request timed out",
+    )
       .then(({ data: { session: s } }) => {
         const activeSession = s ?? readDemoSession();
         setSession(activeSession);

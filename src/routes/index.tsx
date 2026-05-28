@@ -34,6 +34,20 @@ interface RecentPallet {
   products: { name: string; upc: string } | null;
 }
 
+const DASHBOARD_REQUEST_TIMEOUT_MS = 5000;
+
+function withTimeout<T>(request: PromiseLike<T>, ms: number, message: string) {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), ms);
+  });
+
+  return Promise.race([Promise.resolve(request), timeout]).finally(() => {
+    if (timeoutId) clearTimeout(timeoutId);
+  });
+}
+
 function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [recent, setRecent] = useState<RecentPallet[]>([]);
@@ -46,17 +60,21 @@ function Dashboard() {
   const load = async () => {
     setLoading(true);
     try {
-      const [whRes, palletsRes, recentRes] = await Promise.all([
-        supabase.from("warehouses").select("id", { count: "exact", head: true }),
-        supabase.from("pallets").select("final_count, ai_confidence"),
-        supabase
-          .from("pallets")
-          .select(
-            "id, final_count, ai_count, ai_confidence, status, captured_at, warehouses(name), products(name, upc)",
-          )
-          .order("captured_at", { ascending: false })
-          .limit(8),
-      ]);
+      const [whRes, palletsRes, recentRes] = await withTimeout(
+        Promise.all([
+          supabase.from("warehouses").select("id", { count: "exact", head: true }),
+          supabase.from("pallets").select("final_count, ai_confidence"),
+          supabase
+            .from("pallets")
+            .select(
+              "id, final_count, ai_count, ai_confidence, status, captured_at, warehouses(name), products(name, upc)",
+            )
+            .order("captured_at", { ascending: false })
+            .limit(8),
+        ]),
+        DASHBOARD_REQUEST_TIMEOUT_MS,
+        "Dashboard data request timed out",
+      );
 
       const pallets = palletsRes.data ?? [];
       setStats({
