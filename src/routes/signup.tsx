@@ -29,9 +29,13 @@ function SignupPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await signUp(email, password, fullName);
-      toast.success("Account created. You're signed in.");
-      navigate({ to: "/" });
+      const { verificationSent } = await signUp(email, password, fullName);
+      toast.success(
+        verificationSent
+          ? "Check your email to verify your account before signing in."
+          : "Account created. Enable Supabase email confirmations to require verification.",
+      );
+      navigate({ to: "/login" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Sign up failed");
     } finally {
@@ -47,7 +51,7 @@ function SignupPage() {
             <Boxes className="h-5 w-5" />
           </div>
           <CardTitle>Create account</CardTitle>
-          <CardDescription>The first account becomes admin.</CardDescription>
+          <CardDescription>We'll email you a verification link.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">

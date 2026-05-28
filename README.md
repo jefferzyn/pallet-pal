@@ -44,6 +44,7 @@
   - `VITE_SUPABASE_PUBLISHABLE_KEY`
 - Keep `SUPABASE_SERVICE_ROLE_KEY` as a Cloudflare secret only for trusted server-side admin code.
 - `VITE_BARCODE_LOOKUP_API_KEY` is no longer required for UPC lookup.
+- Enable Supabase Auth email confirmations so new signups receive a verification email before sign-in.
 
 ### Data model (high level)
 
