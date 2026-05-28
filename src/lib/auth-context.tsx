@@ -26,6 +26,7 @@ const AuthContext = React.createContext<AuthState | null>(null);
 const DEMO_SESSION_KEY = "pallet-pal-demo-session";
 const AUTH_REQUEST_TIMEOUT_MS = 4000;
 const ROLE_REQUEST_TIMEOUT_MS = 4000;
+const SIGN_IN_REQUEST_TIMEOUT_MS = 8000;
 
 function withTimeout<T>(request: PromiseLike<T>, ms: number, message: string) {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -40,10 +41,20 @@ function withTimeout<T>(request: PromiseLike<T>, ms: number, message: string) {
 }
 
 function isNetworkError(error: unknown) {
+  const objectMessage =
+    error && typeof error === "object" && "message" in error ? String(error.message) : "";
+  const objectName =
+    error && typeof error === "object" && "name" in error ? String(error.name) : "";
+  const message =
+    error instanceof Error
+      ? `${error.name} ${error.message}`
+      : typeof error === "string"
+        ? error
+        : `${objectName} ${objectMessage} ${String(error)}`;
+
   return (
     error instanceof TypeError ||
-    (error instanceof Error &&
-      /failed to fetch|networkerror|load failed|network request failed/i.test(error.message))
+    /fetch|networkerror|load failed|network request failed|authretryablefetcherror/i.test(message)
   );
 }
 
@@ -179,7 +190,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isManagerOrAdmin: () => roles.includes("admin") || roles.includes("manager"),
     signIn: async (email, password) => {
       try {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await withTimeout(
+          supabase.auth.signInWithPassword({ email, password }),
+          SIGN_IN_REQUEST_TIMEOUT_MS,
+          "Sign-in request timed out",
+        );
         if (error) throw error;
       } catch (error) {
         if (canUseDemoAuth() && isNetworkError(error)) {
