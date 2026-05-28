@@ -4,6 +4,10 @@ import type { Session, User } from "@supabase/supabase-js";
 
 export type AppRole = "admin" | "manager" | "worker";
 
+interface SignUpResult {
+  verificationSent: boolean;
+}
+
 interface AuthState {
   user: User | null;
   session: Session | null;
@@ -13,7 +17,7 @@ interface AuthState {
   hasRole: (role: AppRole) => boolean;
   isManagerOrAdmin: () => boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string) => Promise<SignUpResult>;
   signOut: () => Promise<void>;
   refreshRoles: () => Promise<void>;
 }
@@ -166,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
     signUp: async (email, password, fullName) => {
       try {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -175,14 +179,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           },
         });
         if (error) throw error;
+
+        if (data.session) {
+          setSession(null);
+          setUser(null);
+          setRoles([]);
+          await supabase.auth.signOut();
+        }
+
+        return { verificationSent: !data.session };
       } catch (error) {
         if (canUseDemoAuth() && isNetworkError(error)) {
-          const demoSession = createDemoSession(email, fullName);
-          writeDemoSession(demoSession);
-          setSession(demoSession);
-          setUser(demoSession.user);
-          setRoles(["admin"]);
-          return;
+          console.info(
+            `Local preview: skipped Supabase signup for ${email}. A real verification email will be sent when SUPABASE_URL points to an active project with email confirmations enabled.`,
+          );
+          return { verificationSent: true };
         }
 
         throw new Error(authErrorMessage(error));
