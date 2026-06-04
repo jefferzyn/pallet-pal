@@ -1,6 +1,7 @@
 import * as React from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
+import { canUseDemoMode, DEMO_SESSION_KEY } from "@/lib/demo-mode";
 
 export type AppRole = "admin" | "manager" | "worker";
 
@@ -23,13 +24,37 @@ interface AuthState {
 }
 
 const AuthContext = React.createContext<AuthState | null>(null);
-const DEMO_SESSION_KEY = "pallet-pal-demo-session";
+const AUTH_REQUEST_TIMEOUT_MS = 4000;
+const ROLE_REQUEST_TIMEOUT_MS = 4000;
+const SIGN_IN_REQUEST_TIMEOUT_MS = 8000;
+
+function withTimeout<T>(request: PromiseLike<T>, ms: number, message: string) {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), ms);
+  });
+
+  return Promise.race([Promise.resolve(request), timeout]).finally(() => {
+    if (timeoutId) clearTimeout(timeoutId);
+  });
+}
 
 function isNetworkError(error: unknown) {
+  const objectMessage =
+    error && typeof error === "object" && "message" in error ? String(error.message) : "";
+  const objectName =
+    error && typeof error === "object" && "name" in error ? String(error.name) : "";
+  const message =
+    error instanceof Error
+      ? `${error.name} ${error.message}`
+      : typeof error === "string"
+        ? error
+        : `${objectName} ${objectMessage} ${String(error)}`;
+
   return (
     error instanceof TypeError ||
-    (error instanceof Error &&
-      /failed to fetch|networkerror|load failed|network request failed/i.test(error.message))
+    /fetch|networkerror|load failed|network request failed|authretryablefetcherror/i.test(message)
   );
 }
 
@@ -39,13 +64,6 @@ function authErrorMessage(error: unknown) {
   }
 
   return error instanceof Error ? error.message : "Authentication request failed";
-}
-
-function canUseDemoAuth() {
-  return (
-    typeof window !== "undefined" &&
-    ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
-  );
 }
 
 function createDemoSession(email: string, fullName?: string) {
@@ -78,7 +96,7 @@ function createDemoSession(email: string, fullName?: string) {
 }
 
 function readDemoSession() {
-  if (!canUseDemoAuth()) return null;
+  if (!canUseDemoMode()) return null;
 
   const raw = window.localStorage.getItem(DEMO_SESSION_KEY);
   if (!raw) return null;
@@ -102,8 +120,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = React.useState(true);
 
   const loadRoles = React.useCallback(async (uid: string) => {
-    const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
-    setRoles((data ?? []).map((r) => r.role as AppRole));
+    try {
+      const { data } = await withTimeout(
+        supabase.from("user_roles").select("role").eq("user_id", uid),
+        ROLE_REQUEST_TIMEOUT_MS,
+        "Role request timed out",
+      );
+      setRoles((data ?? []).map((r) => r.role as AppRole));
+    } catch (error) {
+      console.error("Unable to load roles", error);
+      setRoles([]);
+    }
   }, []);
 
   React.useEffect(() => {
@@ -116,8 +143,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setRoles([]);
       }
     });
-    supabase.auth
-      .getSession()
+    withTimeout(
+      supabase.auth.getSession(),
+      AUTH_REQUEST_TIMEOUT_MS,
+      "Auth session request timed out",
+    )
       .then(({ data: { session: s } }) => {
         const activeSession = s ?? readDemoSession();
         setSession(activeSession);
@@ -153,10 +183,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isManagerOrAdmin: () => roles.includes("admin") || roles.includes("manager"),
     signIn: async (email, password) => {
       try {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await withTimeout(
+          supabase.auth.signInWithPassword({ email, password }),
+          SIGN_IN_REQUEST_TIMEOUT_MS,
+          "Sign-in request timed out",
+        );
         if (error) throw error;
       } catch (error) {
-        if (canUseDemoAuth() && isNetworkError(error)) {
+        if (canUseDemoMode() && isNetworkError(error)) {
           const demoSession = createDemoSession(email);
           writeDemoSession(demoSession);
           setSession(demoSession);
@@ -189,7 +223,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         return { verificationSent: !data.session };
       } catch (error) {
-        if (canUseDemoAuth() && isNetworkError(error)) {
+        if (canUseDemoMode() && isNetworkError(error)) {
           console.info(
             `Local preview: skipped Supabase signup for ${email}. A real verification email will be sent when SUPABASE_URL points to an active project with email confirmations enabled.`,
           );

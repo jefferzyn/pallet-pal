@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, Package } from "lucide-react";
+import { getDemoProducts } from "@/lib/demo-store";
+import { isDemoSessionActive } from "@/lib/demo-mode";
 
 export const Route = createFileRoute("/catalog")({
   head: () => ({ meta: [{ title: "Catalog — PalletCount" }] }),
@@ -30,6 +32,12 @@ function CatalogPage() {
 
   useEffect(() => {
     void (async () => {
+      if (isDemoSessionActive()) {
+        setProducts(getDemoProducts());
+        setLoading(false);
+        return;
+      }
+
       const { data } = await supabase
         .from("products")
         .select("id,upc,name,brand,image_url")

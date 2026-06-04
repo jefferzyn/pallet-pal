@@ -1,8 +1,11 @@
 // Utility functions for accessing user's pallet videos
 import { supabase } from "@/integrations/supabase/client";
+import { isDemoSessionActive } from "@/lib/demo-mode";
+import { getDemoVideos } from "@/lib/demo-store";
 
 export interface VideoRecord {
   id: string;
+  warehouse_id?: string;
   upc: string | null;
   product_name: string | null;
   warehouse_name: string | null;
@@ -31,6 +34,7 @@ interface PalletVideoRow {
 function toVideoRecord(pallet: PalletVideoRow): VideoRecord {
   return {
     id: pallet.id,
+    warehouse_id: undefined,
     upc: pallet.upc,
     product_name: pallet.products?.name || null,
     warehouse_name: pallet.warehouses?.name || null,
@@ -48,6 +52,8 @@ function toVideoRecord(pallet: PalletVideoRow): VideoRecord {
  * Returns videos from pallets the user has access to (via warehouse assignments)
  */
 export async function getUserPalletVideos(): Promise<VideoRecord[]> {
+  if (isDemoSessionActive()) return getDemoVideos();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -99,6 +105,8 @@ export async function getUserPalletVideos(): Promise<VideoRecord[]> {
  * Get a signed URL for a pallet video (valid for 10 minutes)
  */
 export async function getSignedVideoUrl(videoPath: string): Promise<string | null> {
+  if (isDemoSessionActive()) return videoPath;
+
   const { data } = await supabase.storage.from("pallet-videos").createSignedUrl(videoPath, 600);
 
   return data?.signedUrl ?? null;
@@ -108,6 +116,10 @@ export async function getSignedVideoUrl(videoPath: string): Promise<string | nul
  * Fetch pallet videos for a specific warehouse
  */
 export async function getWarehouseVideos(warehouseId: string): Promise<VideoRecord[]> {
+  if (isDemoSessionActive()) {
+    return getDemoVideos().filter((video) => video.warehouse_id === warehouseId);
+  }
+
   const { data: pallets } = await supabase
     .from("pallets")
     .select(

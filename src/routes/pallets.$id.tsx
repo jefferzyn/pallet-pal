@@ -10,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
+import { getDemoPallet, getDemoPalletHistory, updateDemoPalletCount } from "@/lib/demo-store";
+import { isDemoSessionActive } from "@/lib/demo-mode";
 
 export const Route = createFileRoute("/pallets/$id")({
   head: () => ({ meta: [{ title: "Pallet — PalletCount" }] }),
@@ -53,6 +55,15 @@ function PalletDetail() {
   }, [id]);
 
   const load = async () => {
+    if (isDemoSessionActive()) {
+      const demoPallet = getDemoPallet(id);
+      setPallet(demoPallet as PalletRow | null);
+      setCount(demoPallet?.final_count ?? 0);
+      setVideoUrl(demoPallet?.video_path ?? null);
+      setHistory(getDemoPalletHistory(id));
+      return;
+    }
+
     const { data } = await supabase
       .from("pallets")
       .select(
@@ -81,6 +92,14 @@ function PalletDetail() {
   const updateCount = async () => {
     if (!user || !pallet) return;
     setSaving(true);
+    if (isDemoSessionActive()) {
+      updateDemoPalletCount(id, count);
+      toast.success("Updated");
+      setSaving(false);
+      void load();
+      return;
+    }
+
     const prev = pallet.final_count;
     const { error } = await supabase.from("pallets").update({ final_count: count }).eq("id", id);
     if (error) {

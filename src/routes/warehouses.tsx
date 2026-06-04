@@ -18,6 +18,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 import { Plus, Warehouse } from "lucide-react";
+import { createDemoWarehouse, getDemoWarehouses } from "@/lib/demo-store";
+import { isDemoSessionActive } from "@/lib/demo-mode";
 
 export const Route = createFileRoute("/warehouses")({
   head: () => ({ meta: [{ title: "Warehouses — PalletCount" }] }),
@@ -47,6 +49,12 @@ function WarehousesPage() {
 
   const load = async () => {
     setLoading(true);
+    if (isDemoSessionActive()) {
+      setItems(getDemoWarehouses());
+      setLoading(false);
+      return;
+    }
+
     const { data, error } = await supabase
       .from("warehouses")
       .select("id,name,address,notes")
@@ -63,6 +71,18 @@ function WarehousesPage() {
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    if (isDemoSessionActive()) {
+      createDemoWarehouse({ name, address: address || null, notes: notes || null });
+      setSaving(false);
+      toast.success("Warehouse created");
+      setOpen(false);
+      setName("");
+      setAddress("");
+      setNotes("");
+      void load();
+      return;
+    }
+
     const { error } = await supabase
       .from("warehouses")
       .insert({ name, address: address || null, notes: notes || null });
