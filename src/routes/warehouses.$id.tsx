@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, ArrowLeft } from "lucide-react";
+import { getDemoPalletRows, getDemoWarehouses } from "@/lib/demo-store";
+import { isDemoSessionActive } from "@/lib/demo-mode";
 
 export const Route = createFileRoute("/warehouses/$id")({
   head: () => ({ meta: [{ title: "Warehouse — PalletCount" }] }),
@@ -38,6 +40,13 @@ function WarehouseDetail() {
 
   useEffect(() => {
     void (async () => {
+      if (isDemoSessionActive()) {
+        setWh(getDemoWarehouses().find((warehouse) => warehouse.id === id) ?? null);
+        setPallets(getDemoPalletRows().filter((pallet) => pallet.warehouse_id === id));
+        setLoading(false);
+        return;
+      }
+
       const [a, b] = await Promise.all([
         supabase.from("warehouses").select("id,name,address").eq("id", id).single(),
         supabase

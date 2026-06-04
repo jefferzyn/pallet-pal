@@ -16,6 +16,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Download, Search } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { getDemoPalletRows } from "@/lib/demo-store";
+import { isDemoSessionActive } from "@/lib/demo-mode";
 
 export const Route = createFileRoute("/inventory")({
   head: () => ({ meta: [{ title: "Inventory — PalletCount" }] }),
@@ -44,6 +46,12 @@ function InventoryPage() {
 
   useEffect(() => {
     void (async () => {
+      if (isDemoSessionActive()) {
+        setRows(getDemoPalletRows());
+        setLoading(false);
+        return;
+      }
+
       const { data } = await supabase
         .from("pallets")
         .select(

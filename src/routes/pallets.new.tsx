@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { lookupUpc } from "@/lib/upc-lookup";
 import { extractFrames } from "@/lib/video-frames";
+import { isDemoSessionActive } from "@/lib/demo-mode";
+import { createDemoPallet, getDemoWarehouses, upsertDemoProduct } from "@/lib/demo-store";
 import { toast } from "sonner";
 import {
   Boxes,
@@ -86,6 +88,11 @@ function NewPallet() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (isDemoSessionActive()) {
+      setWarehouses(getDemoWarehouses());
+      return;
+    }
+
     void supabase
       .from("warehouses")
       .select("id,name")
@@ -109,6 +116,13 @@ function NewPallet() {
   const loadProduct = async (code: string) => {
     setProductLoading(true);
     try {
+      if (isDemoSessionActive()) {
+        setProduct({ upc: code, name: "", brand: null, image_url: null });
+        setManualName("");
+        setManualBrand("");
+        return;
+      }
+
       const { data: existing } = await supabase
         .from("products")
         .select("id,upc,name,brand,image_url")
@@ -146,6 +160,18 @@ function NewPallet() {
       toast.error("Product name is required");
       return;
     }
+    if (isDemoSessionActive()) {
+      const data = upsertDemoProduct({
+        upc,
+        name: manualName.trim(),
+        brand: manualBrand.trim() || null,
+        image_url: product?.image_url ?? null,
+      });
+      setProduct(data);
+      setStep("video");
+      return;
+    }
+
     // Upsert into catalog
     const { data, error } = await supabase
       .from("products")
@@ -184,6 +210,18 @@ function NewPallet() {
     if (!videoFile) return;
     setAnalyzing(true);
     try {
+      if (isDemoSessionActive()) {
+        const estimated = Math.max(1, Math.min(240, Math.round(videoFile.size / 250_000) + 12));
+        setAi({
+          estimated_count: estimated,
+          confidence: 0.72,
+          reasoning: "Local demo estimate generated without calling the AI service.",
+        });
+        setFinalCount(estimated);
+        setStep("review");
+        return;
+      }
+
       toast.info("Extracting frames…");
       const frames = await extractFrames(videoFile, 6, 720);
       toast.info("Analyzing with AI vision…");
@@ -207,6 +245,23 @@ function NewPallet() {
     if (!user || !warehouseId || !product?.id || !videoFile) return;
     setSaving(true);
     try {
+      if (isDemoSessionActive()) {
+        const pallet = createDemoPallet({
+          warehouse_id: warehouseId,
+          product_id: product.id,
+          upc: product.upc,
+          ai_count: ai?.estimated_count ?? null,
+          ai_confidence: ai?.confidence ?? null,
+          ai_reasoning: ai?.reasoning ?? null,
+          final_count: finalCount,
+          video_path: videoUrl,
+          notes: notes || null,
+        });
+        toast.success("Pallet recorded");
+        navigate({ to: "/pallets/$id", params: { id: pallet.id } });
+        return;
+      }
+
       // Upload video
       const path = `${user.id}/${crypto.randomUUID()}-${videoFile.name.replace(/[^a-z0-9.-]/gi, "_")}`;
       const up = await supabase.storage.from("pallet-videos").upload(path, videoFile, {

@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { Boxes, Warehouse, Package, AlertTriangle, Plus } from "lucide-react";
+import { getDemoPalletRows, getDemoWarehouses } from "@/lib/demo-store";
+import { isDemoSessionActive } from "@/lib/demo-mode";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [{ title: "Dashboard — PalletCount" }] }),
@@ -59,6 +61,19 @@ function Dashboard() {
 
   const load = async () => {
     setLoading(true);
+    if (isDemoSessionActive()) {
+      const pallets = getDemoPalletRows();
+      setStats({
+        warehouses: getDemoWarehouses().length,
+        pallets: pallets.length,
+        totalBoxes: pallets.reduce((s, p) => s + (p.final_count ?? 0), 0),
+        lowConfidence: pallets.filter((p) => (p.ai_confidence ?? 1) < 0.6).length,
+      });
+      setRecent(pallets.slice(0, 8));
+      setLoading(false);
+      return;
+    }
+
     try {
       const [whRes, palletsRes, recentRes] = await withTimeout(
         Promise.all([

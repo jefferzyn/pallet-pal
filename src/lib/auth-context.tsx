@@ -1,6 +1,7 @@
 import * as React from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
+import { canUseDemoMode, DEMO_SESSION_KEY } from "@/lib/demo-mode";
 
 export type AppRole = "admin" | "manager" | "worker";
 
@@ -23,7 +24,6 @@ interface AuthState {
 }
 
 const AuthContext = React.createContext<AuthState | null>(null);
-const DEMO_SESSION_KEY = "pallet-pal-demo-session";
 const AUTH_REQUEST_TIMEOUT_MS = 4000;
 const ROLE_REQUEST_TIMEOUT_MS = 4000;
 const SIGN_IN_REQUEST_TIMEOUT_MS = 8000;
@@ -66,13 +66,6 @@ function authErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Authentication request failed";
 }
 
-function canUseDemoAuth() {
-  return (
-    typeof window !== "undefined" &&
-    ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
-  );
-}
-
 function createDemoSession(email: string, fullName?: string) {
   const now = Math.floor(Date.now() / 1000);
   const user = {
@@ -103,7 +96,7 @@ function createDemoSession(email: string, fullName?: string) {
 }
 
 function readDemoSession() {
-  if (!canUseDemoAuth()) return null;
+  if (!canUseDemoMode()) return null;
 
   const raw = window.localStorage.getItem(DEMO_SESSION_KEY);
   if (!raw) return null;
@@ -197,7 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
         if (error) throw error;
       } catch (error) {
-        if (canUseDemoAuth() && isNetworkError(error)) {
+        if (canUseDemoMode() && isNetworkError(error)) {
           const demoSession = createDemoSession(email);
           writeDemoSession(demoSession);
           setSession(demoSession);
@@ -230,7 +223,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         return { verificationSent: !data.session };
       } catch (error) {
-        if (canUseDemoAuth() && isNetworkError(error)) {
+        if (canUseDemoMode() && isNetworkError(error)) {
           console.info(
             `Local preview: skipped Supabase signup for ${email}. A real verification email will be sent when SUPABASE_URL points to an active project with email confirmations enabled.`,
           );
