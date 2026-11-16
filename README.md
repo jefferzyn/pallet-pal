@@ -46,6 +46,10 @@
 - `VITE_BARCODE_LOOKUP_API_KEY` is no longer required for UPC lookup.
 - Enable Supabase Auth email confirmations so new signups receive a verification email before sign-in.
 
+### Local environment
+
+Copy `.env.example` to `.env` and set the Supabase project URL and publishable key. Keep `.env` and all service-role or deployment credentials out of version control.
+
 ### Data model (high level)
 
 - `warehouses` (name, address, manager)
